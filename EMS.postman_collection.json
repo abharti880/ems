@@ -1,0 +1,643 @@
+{
+	"info": {
+		"_postman_id": "3eeda2b7-281e-4bca-8309-acfcf4f0f654",
+		"name": "EMS",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+		"_exporter_id": "43380610"
+	},
+	"item": [
+		{
+			"name": "Leave",
+			"item": [
+				{
+					"name": "Get Leaves by id",
+					"request": {
+						"auth": {
+							"type": "basic",
+							"basic": [
+								{
+									"key": "username",
+									"value": "user@ems.com",
+									"type": "string"
+								},
+								{
+									"key": "password",
+									"value": "user123",
+									"type": "string"
+								}
+							]
+						},
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "http://localhost:8080/api/leaves/employee/2",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "8080",
+							"path": [
+								"api",
+								"leaves",
+								"employee",
+								"2"
+							]
+						},
+						"description": "Generated from cURL: curl -i \\\n  -u user@ems.com:user123 \\\n  http://localhost:8080/api/leaves/employee/2\n"
+					},
+					"response": []
+				},
+				{
+					"name": "Get leaves via Admin",
+					"request": {
+						"auth": {
+							"type": "basic",
+							"basic": [
+								{
+									"key": "username",
+									"value": "admin@ems.com",
+									"type": "string"
+								},
+								{
+									"key": "password",
+									"value": "admin123",
+									"type": "string"
+								}
+							]
+						},
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "http://localhost:8080/api/leaves/employee/2",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "8080",
+							"path": [
+								"api",
+								"leaves",
+								"employee",
+								"2"
+							]
+						},
+						"description": "Generated from cURL: curl -i \\\n  -u admin@ems.com:admin123 \\\n  http://localhost:8080/api/leaves/employee/2\n"
+					},
+					"response": []
+				},
+				{
+					"name": "Update Leave via Admin",
+					"request": {
+						"auth": {
+							"type": "basic",
+							"basic": [
+								{
+									"key": "username",
+									"value": "admin@ems.com",
+									"type": "string"
+								},
+								{
+									"key": "password",
+									"value": "admin123",
+									"type": "string"
+								}
+							]
+						},
+						"method": "PUT",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"status\": \"APPROVED\"\n  }",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "http://localhost:8080/api/leaves/1/status",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "8080",
+							"path": [
+								"api",
+								"leaves",
+								"1",
+								"status"
+							]
+						},
+						"description": "Generated from cURL: curl -i \\\n  -u admin@ems.com:admin123 \\\n  -H \"Content-Type: application/json\" \\\n  -X PUT \\\n  -d '{\n    \"status\": \"APPROVED\"\n  }' \\\n  http://localhost:8080/api/leaves/1/status\n"
+					},
+					"response": []
+				},
+				{
+					"name": "Update Leave by user",
+					"request": {
+						"auth": {
+							"type": "basic",
+							"basic": [
+								{
+									"key": "username",
+									"value": "user@ems.com",
+									"type": "string"
+								},
+								{
+									"key": "password",
+									"value": "user123",
+									"type": "string"
+								}
+							]
+						},
+						"method": "PUT",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"status\": \"REJECTED\"\n  }",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "http://localhost:8080/api/leaves/1/status",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "8080",
+							"path": [
+								"api",
+								"leaves",
+								"1",
+								"status"
+							]
+						},
+						"description": "Generated from cURL: curl -i \\\n  -u user@ems.com:user123 \\\n  -H \"Content-Type: application/json\" \\\n  -X PUT \\\n  -d '{\n    \"status\": \"REJECTED\"\n  }' \\\n  http://localhost:8080/api/leaves/1/status\n"
+					},
+					"response": []
+				},
+				{
+					"name": "Validation Edge cases Leaves [Start date after end date]",
+					"request": {
+						"auth": {
+							"type": "basic",
+							"basic": [
+								{
+									"key": "username",
+									"value": "user@ems.com",
+									"type": "string"
+								},
+								{
+									"key": "password",
+									"value": "user123",
+									"type": "string"
+								}
+							]
+						},
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"employee\": { \"id\": 2 },\n    \"startDate\": \"2026-04-10\",\n    \"endDate\": \"2026-04-05\",\n    \"reason\": \"Invalid dates\"\n  }",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "http://localhost:8080/api/leaves",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "8080",
+							"path": [
+								"api",
+								"leaves"
+							]
+						},
+						"description": "Generated from cURL: curl -i \\\n  -u user@ems.com:user123 \\\n  -H \"Content-Type: application/json\" \\\n  -d '{\n    \"employee\": { \"id\": 2 },\n    \"startDate\": \"2026-04-10\",\n    \"endDate\": \"2026-04-05\",\n    \"reason\": \"Invalid dates\"\n  }' \\\n  http://localhost:8080/api/leaves\n"
+					},
+					"response": []
+				},
+				{
+					"name": "create leave",
+					"request": {
+						"auth": {
+							"type": "basic",
+							"basic": [
+								{
+									"key": "username",
+									"value": "admin@ems.com",
+									"type": "string"
+								},
+								{
+									"key": "password",
+									"value": "admin123",
+									"type": "string"
+								}
+							]
+						},
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n        \"employeeId\": 13,\n        \"startDate\": \"2026-03-20\",\n        \"endDate\": \"2026-03-22\",\n        \"reason\": \"Conference\"\n      }",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "http://localhost:8080/api/leaves",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "8080",
+							"path": [
+								"api",
+								"leaves"
+							]
+						},
+						"description": "Generated from cURL: curl -u admin@ems.com:admin123 \\\n  -X POST \\\n  http://localhost:8080/api/leaves \\\n  -H \"Content-Type: application/json\" \\\n  -d '{\n        \"employeeId\": 13,\n        \"startDate\": \"2026-03-20\",\n        \"endDate\": \"2026-03-22\",\n        \"reason\": \"Conference\"\n      }'\n"
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "Department",
+			"item": [
+				{
+					"name": "Get Departments",
+					"request": {
+						"auth": {
+							"type": "basic",
+							"basic": [
+								{
+									"key": "username",
+									"value": "admin@ems.com",
+									"type": "string"
+								},
+								{
+									"key": "password",
+									"value": "admin123",
+									"type": "string"
+								}
+							]
+						},
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "http://localhost:8080/api/departments",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "8080",
+							"path": [
+								"api",
+								"departments"
+							]
+						},
+						"description": "Generated from cURL: curl -u admin@ems.com:admin123 \\\nhttp://localhost:8080/api/departments\n"
+					},
+					"response": []
+				},
+				{
+					"name": "Get Employees by Department",
+					"request": {
+						"auth": {
+							"type": "basic",
+							"basic": [
+								{
+									"key": "username",
+									"value": "admin@ems.com",
+									"type": "string"
+								},
+								{
+									"key": "password",
+									"value": "admin123",
+									"type": "string"
+								}
+							]
+						},
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "http://localhost:8080/api/departments/1/employees",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "8080",
+							"path": [
+								"api",
+								"departments",
+								"1",
+								"employees"
+							]
+						},
+						"description": "Generated from cURL: curl -u admin@ems.com:admin123 \\\nhttp://localhost:8080/api/departments/1/employees\n"
+					},
+					"response": []
+				},
+				{
+					"name": "Create Departments",
+					"request": {
+						"auth": {
+							"type": "basic",
+							"basic": [
+								{
+									"key": "username",
+									"value": "admin@ems.com",
+									"type": "string"
+								},
+								{
+									"key": "password",
+									"value": "admin123",
+									"type": "string"
+								}
+							]
+						},
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"name\": \"Engineering\",\n  \"location\": \"Bangalore\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "http://localhost:8080/api/departments",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "8080",
+							"path": [
+								"api",
+								"departments"
+							]
+						},
+						"description": "Generated from cURL: curl -u admin@ems.com:admin123 \\\n-H \"Content-Type: application/json\" \\\n-d '{\n  \"name\": \"Engineering\",\n  \"location\": \"Bangalore\"\n}' \\\nhttp://localhost:8080/api/departments\n"
+					},
+					"response": []
+				},
+				{
+					"name": "Get Department from another user[403]",
+					"request": {
+						"auth": {
+							"type": "basic",
+							"basic": [
+								{
+									"key": "username",
+									"value": "user@ems.com",
+									"type": "string"
+								},
+								{
+									"key": "password",
+									"value": "user123",
+									"type": "string"
+								}
+							]
+						},
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "http://localhost:8080/api/departments",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "8080",
+							"path": [
+								"api",
+								"departments"
+							]
+						},
+						"description": "Generated from cURL: curl -u user@ems.com:user123 \\\nhttp://localhost:8080/api/departments\n"
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "Employee",
+			"item": [
+				{
+					"name": "Create Employees",
+					"request": {
+						"auth": {
+							"type": "basic",
+							"basic": [
+								{
+									"key": "username",
+									"value": "admin@ems.com",
+									"type": "string"
+								},
+								{
+									"key": "password",
+									"value": "admin123",
+									"type": "string"
+								}
+							]
+						},
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"fullName\": \"Rohit Sharma\",\n    \"email\": \"rohit.sharma@ems.com\",\n    \"password\": \"rohit123\",\n    \"role\": \"ROLE_USER\",\n    \"departmentId\": 3,\n    \"salary\": 75000,\n    \"joiningDate\": \"2026-02-03\"\n  }",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "http://localhost:8080/api/employees",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "8080",
+							"path": [
+								"api",
+								"employees"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Update Employee",
+					"request": {
+						"auth": {
+							"type": "basic",
+							"basic": [
+								{
+									"key": "username",
+									"value": "admin@ems.com",
+									"type": "string"
+								},
+								{
+									"key": "password",
+									"value": "admin123",
+									"type": "string"
+								}
+							]
+						},
+						"method": "PUT",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"fullName\": \"John Doe\",\n    \"salary\": 90000,\n    \"departmentId\": 4\n  }",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "http://localhost:8080/api/employees/3",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "8080",
+							"path": [
+								"api",
+								"employees",
+								"3"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Get Employee by Id",
+					"request": {
+						"auth": {
+							"type": "basic",
+							"basic": [
+								{
+									"key": "username",
+									"value": "admin@ems.com",
+									"type": "string"
+								},
+								{
+									"key": "password",
+									"value": "admin123",
+									"type": "string"
+								}
+							]
+						},
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "http://localhost:8080/api/employees/13",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "8080",
+							"path": [
+								"api",
+								"employees",
+								"13"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Get Employee self",
+					"request": {
+						"auth": {
+							"type": "basic",
+							"basic": [
+								{
+									"key": "username",
+									"value": "john.doe@ems.com",
+									"type": "string"
+								},
+								{
+									"key": "password",
+									"value": "password123",
+									"type": "string"
+								}
+							]
+						},
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "http://localhost:8080/api/employees/me",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "8080",
+							"path": [
+								"api",
+								"employees",
+								"me"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		}
+	],
+	"variable": [
+		{
+			"key": "baseURL",
+			"value": "",
+			"type": "default"
+		}
+	]
+}

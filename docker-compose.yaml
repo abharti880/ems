@@ -1,0 +1,56 @@
+services:
+
+  rabbitmq:
+    image: rabbitmq:3.12-management
+    container_name: ems-rabbitmq
+    ports:
+      - "5672:5672"
+      - "15672:15672"
+    environment:
+      RABBITMQ_DEFAULT_USER: myuser
+      RABBITMQ_DEFAULT_PASS: secret
+    healthcheck:
+      test: ["CMD", "rabbitmq-diagnostics", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  db:
+    image: postgres:15
+    container_name: ems-db
+    environment:
+      POSTGRES_DB: ems
+      POSTGRES_USER: ems_user
+      POSTGRES_PASSWORD: ems_pass
+    volumes:
+      - ems-db-data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ems_user"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  app:
+    build: .
+    image: ems-app
+    container_name: ems-app
+    ports:
+      - "8080:8080"
+    depends_on:
+      db:
+        condition: service_healthy
+      rabbitmq:
+        condition: service_healthy
+    environment:
+      SPRING_DATASOURCE_URL: jdbc:postgresql://db:5432/ems
+      SPRING_DATASOURCE_USERNAME: ems_user
+      SPRING_DATASOURCE_PASSWORD: ems_pass
+
+      SPRING_RABBITMQ_HOST: rabbitmq
+      SPRING_RABBITMQ_PORT: 5672
+      SPRING_RABBITMQ_USERNAME: myuser
+      SPRING_RABBITMQ_PASSWORD: secret
+    restart: unless-stopped
+
+volumes:
+  ems-db-data:
