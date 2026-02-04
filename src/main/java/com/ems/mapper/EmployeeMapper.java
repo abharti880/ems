@@ -1,35 +1,37 @@
 package com.ems.mapper;
 
-import com.ems.dto.DepartmentSummary;
-import com.ems.dto.EmployeeResponse;
-import com.ems.entity.Department;
+import com.ems.dto.*;
 import com.ems.entity.Employee;
+import org.mapstruct.BeanMapping;
+import org.mapstruct.Mapper;
+import org.mapstruct.Mapping;
+import org.mapstruct.MappingTarget;
+import org.mapstruct.NullValuePropertyMappingStrategy;
 
-public class EmployeeMapper {
+@Mapper(componentModel = "spring")
+public interface EmployeeMapper {
 
-    public static EmployeeResponse toResponse(Employee employee) {
+    @Mapping(target = "department", source = "department")
+    @Mapping(target = "createdAt", source = "creationTimestamp")
+    @Mapping(target = "updatedAt", source = "lastUpdateTimestamp")
+    EmployeeAdminResponse toAdminResponse(Employee employee);
 
-        Department dept = employee.getDepartment();
+    EmployeeSelfResponse toSelfResponse(Employee employee);
 
-        DepartmentSummary deptSummary = null;
-        if (dept != null) {
-            deptSummary = new DepartmentSummary();
-            deptSummary.setId(dept.getId());
-            deptSummary.setName(dept.getName());
-        }
+    @Mapping(target = "id", ignore = true)
+    @Mapping(target = "creationTimestamp", ignore = true)
+    @Mapping(target = "lastUpdateTimestamp", ignore = true)
+    @Mapping(target = "department", ignore = true)
+    Employee toEntity(EmployeeCreateRequest request);
 
-        EmployeeResponse response = new EmployeeResponse();
-        response.setId(employee.getId());
-        response.setFullName(employee.getFullName());
-        response.setEmail(employee.getEmail());
-        response.setDepartment(deptSummary);
-        response.setSalary(employee.getSalary());
-        response.setJoiningDate(employee.getJoiningDate());
-        response.setCreatedAt(employee.getCreationTimestamp());
-        response.setUpdatedAt(employee.getLastUpdateTimestamp());
-        response.setRole(employee.getRole());
-
-        return response;
-    }
+    @BeanMapping(nullValuePropertyMappingStrategy = NullValuePropertyMappingStrategy.IGNORE)
+    @Mapping(target = "id", ignore = true)
+    @Mapping(target = "creationTimestamp", ignore = true)
+    @Mapping(target = "lastUpdateTimestamp", ignore = true)
+    @Mapping(target = "department", ignore = true)
+    @Mapping(target = "password", ignore = true)
+    @Mapping(target = "role", ignore = true)
+    @Mapping(target = "email", ignore = true)
+    @Mapping(target = "joiningDate", ignore = true)
+    void updateEntityFromRequest(EmployeeUpdateRequest request, @MappingTarget Employee employee);
 }
-

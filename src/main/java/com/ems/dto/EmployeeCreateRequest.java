@@ -2,14 +2,18 @@ package com.ems.dto;
 
 import com.ems.Enums.Role;
 import jakarta.validation.constraints.*;
-import lombok.Getter;
-import lombok.Setter;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.Data;
+import lombok.NoArgsConstructor;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
 
-@Getter
-@Setter
+@Data
+@Builder
+@NoArgsConstructor
+@AllArgsConstructor
 public class EmployeeCreateRequest {
 
     @NotBlank
@@ -37,4 +41,3 @@ public class EmployeeCreateRequest {
     private LocalDate joiningDate;
 
 }
-

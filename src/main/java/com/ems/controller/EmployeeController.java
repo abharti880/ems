@@ -1,8 +1,6 @@
 package com.ems.controller;
 
-import com.ems.dto.EmployeeCreateRequest;
-import com.ems.dto.EmployeeResponse;
-import com.ems.dto.EmployeeUpdateRequest;
+import com.ems.dto.*;
 import com.ems.entity.Employee;
 import com.ems.service.EmployeeService;
 import jakarta.validation.Valid;
@@ -27,29 +25,28 @@ public class EmployeeController {
 
     @GetMapping
     @PreAuthorize("hasRole('ADMIN')")
-    public Page<EmployeeResponse> getAllEmployees(@RequestParam(defaultValue = "0") int page, @RequestParam(defaultValue = "10") int size, @RequestParam(defaultValue = "fullName") String sortBy, @RequestParam(defaultValue = "asc") String direction, @RequestParam(required = false) Long departmentId) {
+    public Page<EmployeeAdminResponse> getAllEmployees(@RequestParam(defaultValue = "0") int page, @RequestParam(defaultValue = "10") int size, @RequestParam(defaultValue = "fullName") String sortBy, @RequestParam(defaultValue = "asc") String direction, @RequestParam(required = false) Long departmentId) {
         return employeeService.getAllEmployees(page, size, sortBy, direction, departmentId);
     }
 
     @GetMapping("/{id}")
     @PreAuthorize("hasRole('ADMIN')")
-    public EmployeeResponse getEmployeeById(@PathVariable Long id) {
+    public EmployeeAdminResponse getEmployeeById(@PathVariable Long id) {
         log.info("Fetching employee by id={}", id);
         return employeeService.getEmployeeById(id);
     }
 
     @PostMapping
     @PreAuthorize("hasRole('ADMIN')")
-    public ResponseEntity<EmployeeResponse> createEmployee(@Valid @RequestBody EmployeeCreateRequest request) {
-        EmployeeResponse response = employeeService.createEmployee(request);
+    public ResponseEntity<EmployeeAdminResponse> createEmployee(@Valid @RequestBody EmployeeCreateRequest request) {
+        EmployeeAdminResponse response = employeeService.createEmployee(request);
         return ResponseEntity.status(HttpStatus.CREATED).body(response);
     }
 
-
     @PutMapping("/{id}")
     @PreAuthorize("hasRole('ADMIN')")
-    public ResponseEntity<EmployeeResponse> updateEmployee(@PathVariable Long id, @RequestBody EmployeeUpdateRequest request) {
-        EmployeeResponse response = employeeService.updateEmployee(id, request);
+    public ResponseEntity<EmployeeAdminResponse> updateEmployee(@PathVariable Long id, @RequestBody EmployeeUpdateRequest request) {
+        EmployeeAdminResponse response = employeeService.updateEmployee(id, request);
         return ResponseEntity.ok(response);
     }
 
@@ -61,13 +58,13 @@ public class EmployeeController {
         return ResponseEntity.noContent().build();
     }
 
-
     @GetMapping("/me")
     @PreAuthorize("hasRole('ADMIN') or #email == authentication.name")
-    public EmployeeResponse getMyProfile(Authentication authentication) {
+    public ResponseEntity<EmployeeSelfResponse> getMyProfile(Authentication authentication) {
         String email = authentication.getName();
         log.info("Fetching self profile email={}", email);
 
-        return employeeService.getEmployeeProfile(email);
+        EmployeeSelfResponse response = employeeService.getEmployeeProfile(email);
+        return ResponseEntity.ok(response);
     }
 }

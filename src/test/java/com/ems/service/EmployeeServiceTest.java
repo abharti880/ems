@@ -1,14 +1,12 @@
 package com.ems.service;
 
 import com.ems.Enums.Role;
-import com.ems.dto.EmployeeCreateRequest;
-import com.ems.dto.EmployeeResponse;
-import com.ems.dto.EmployeeUpdateRequest;
-import com.ems.dto.NotificationDTO;
+import com.ems.dto.*;
 import com.ems.entity.Department;
 import com.ems.entity.Employee;
 import com.ems.exception.ResourceNotFoundException;
 import com.ems.messaging.NotificationPublisher;
+import com.ems.mapper.EmployeeMapper;
 import com.ems.repository.DepartmentRepository;
 import com.ems.repository.EmployeeRepository;
 
@@ -37,206 +35,223 @@ import static org.mockito.Mockito.*;
 @ExtendWith(MockitoExtension.class)
 class EmployeeServiceTest {
 
-    @InjectMocks
-    private EmployeeService employeeService;
+        @InjectMocks
+        private EmployeeService employeeService;
 
-    @Mock
-    private EmployeeRepository employeeRepository;
+        @Mock
+        private EmployeeRepository employeeRepository;
 
-    @Mock
-    private DepartmentRepository departmentRepository;
+        @Mock
+        private DepartmentRepository departmentRepository;
 
-    @Mock
-    private NotificationPublisher notificationPublisher;
+        @Mock
+        private NotificationPublisher notificationPublisher;
 
-    @Mock
-    private PasswordEncoder passwordEncoder;
+        @Mock
+        private PasswordEncoder passwordEncoder;
 
+        @Mock
+        private EmployeeMapper employeeMapper;
 
-    @Test
-    void getAllEmployees_withoutDepartment() {
-        Employee employee = new Employee();
-        Page<Employee> page = new PageImpl<>(List.of(employee));
+        @Test
+        void getAllEmployees_withoutDepartment() {
+                Employee employee = new Employee();
+                Page<Employee> page = new PageImpl<>(List.of(employee));
+                EmployeeAdminResponse employeeResponse = new EmployeeAdminResponse();
 
-        when(employeeRepository.findAll(any(PageRequest.class))).thenReturn(page);
+                when(employeeRepository.findAll(any(PageRequest.class))).thenReturn(page);
+                when(employeeMapper.toAdminResponse(any(Employee.class))).thenReturn(employeeResponse);
 
-        Page<EmployeeResponse> result =
-                employeeService.getAllEmployees(0, 10, "fullName", "asc", null);
+                Page<EmployeeAdminResponse> result = employeeService.getAllEmployees(0, 10, "fullName", "asc", null);
 
-        assertEquals(1, result.getTotalElements());
-    }
+                assertEquals(1, result.getTotalElements());
+        }
 
-    @Test
-    void getAllEmployees_withDepartment() {
-        Employee employee = new Employee();
-        Page<Employee> page = new PageImpl<>(List.of(employee));
+        @Test
+        void getAllEmployees_withDepartment() {
+                Employee employee = new Employee();
+                Page<Employee> page = new PageImpl<>(List.of(employee));
+                EmployeeAdminResponse employeeResponse = new EmployeeAdminResponse();
 
-        when(employeeRepository.findByDepartmentId(eq(1L), any(PageRequest.class)))
-                .thenReturn(page);
+                when(employeeRepository.findByDepartmentId(eq(1L), any(PageRequest.class)))
+                                .thenReturn(page);
+                when(employeeMapper.toAdminResponse(any(Employee.class))).thenReturn(employeeResponse);
 
-        Page<EmployeeResponse> result =
-                employeeService.getAllEmployees(0, 10, "fullName", "desc", 1L);
+                Page<EmployeeAdminResponse> result = employeeService.getAllEmployees(0, 10, "fullName", "desc", 1L);
 
-        assertEquals(1, result.getTotalElements());
-    }
+                assertEquals(1, result.getTotalElements());
+        }
 
-    @Test
-    void getEmployeeProfile_success() {
-        Employee employee = new Employee();
-        employee.setEmail("test@test.com");
+        @Test
+        void getEmployeeProfile_success() {
+                Employee employee = new Employee();
+                employee.setEmail("test@test.com");
+                EmployeeAdminResponse employeeResponse = new EmployeeAdminResponse();
 
-        when(employeeRepository.findByEmail("test@test.com"))
-                .thenReturn(Optional.of(employee));
+                when(employeeRepository.findByEmail("test@test.com"))
+                                .thenReturn(Optional.of(employee));
+                when(employeeMapper.toAdminResponse(employee)).thenReturn(employeeResponse);
 
-        EmployeeResponse response =
-                employeeService.getEmployeeProfile("test@test.com");
+                EmployeeResponse response = employeeService.getEmployeeProfile("test@test.com");
 
-        assertNotNull(response);
-    }
+                assertNotNull(response);
+        }
 
-    @Test
-    void getEmployeeProfile_notFound() {
-        when(employeeRepository.findByEmail("x@test.com"))
-                .thenReturn(Optional.empty());
+        @Test
+        void getEmployeeProfile_notFound() {
+                when(employeeRepository.findByEmail("x@test.com"))
+                                .thenReturn(Optional.empty());
 
-        assertThrows(ResourceNotFoundException.class,
-                () -> employeeService.getEmployeeProfile("x@test.com"));
-    }
+                assertThrows(ResourceNotFoundException.class,
+                                () -> employeeService.getEmployeeProfile("x@test.com"));
+        }
 
-    @Test
-    void getEmployeeById_success() {
-        Employee employee = new Employee();
-        employee.setId(1L);
+        @Test
+        void getEmployeeById_success() {
+                Employee employee = new Employee();
+                employee.setId(1L);
+                EmployeeAdminResponse employeeResponse = new EmployeeAdminResponse();
 
-        when(employeeRepository.findById(1L))
-                .thenReturn(Optional.of(employee));
+                when(employeeRepository.findById(1L))
+                                .thenReturn(Optional.of(employee));
+                when(employeeMapper.toAdminResponse(employee)).thenReturn(employeeResponse);
 
-        EmployeeResponse response =
-                employeeService.getEmployeeById(1L);
+                EmployeeResponse response = employeeService.getEmployeeById(1L);
 
-        assertNotNull(response);
-    }
+                assertNotNull(response);
+        }
 
-    @Test
-    void getEmployeeById_notFound() {
-        when(employeeRepository.findById(99L))
-                .thenReturn(Optional.empty());
+        @Test
+        void getEmployeeById_notFound() {
+                when(employeeRepository.findById(99L))
+                                .thenReturn(Optional.empty());
 
-        assertThrows(ResourceNotFoundException.class,
-                () -> employeeService.getEmployeeById(99L));
-    }
+                assertThrows(ResourceNotFoundException.class,
+                                () -> employeeService.getEmployeeById(99L));
+        }
 
-    @Test
-    void createEmployee_success() {
-        EmployeeCreateRequest request = new EmployeeCreateRequest();
-        request.setFullName("Test User");
-        request.setEmail("test@test.com");
-        request.setPassword("password");
-        request.setRole(Role.ROLE_USER);
-        request.setSalary(BigDecimal.valueOf(50000));
-        request.setJoiningDate(LocalDate.now());
-        request.setDepartmentId(1L);
+        @Test
+        void createEmployee_success() {
+                EmployeeCreateRequest request = new EmployeeCreateRequest();
+                request.setFullName("Test User");
+                request.setEmail("test@test.com");
+                request.setPassword("password");
+                request.setRole(Role.ROLE_USER);
+                request.setSalary(BigDecimal.valueOf(50000));
+                request.setJoiningDate(LocalDate.now());
+                request.setDepartmentId(1L);
 
-        Department department = new Department();
-        department.setId(1L);
+                Department department = new Department();
+                department.setId(1L);
 
-        Employee saved = new Employee();
-        saved.setId(10L);
-        saved.setFullName("Test User");
-        saved.setEmail("test@test.com");
+                Employee mappedEmployee = new Employee();
+                mappedEmployee.setFullName("Test User");
+                mappedEmployee.setEmail("test@test.com");
 
-        when(employeeRepository.existsByEmail("test@test.com")).thenReturn(false);
-        when(departmentRepository.findById(1L)).thenReturn(Optional.of(department));
-        when(passwordEncoder.encode("password")).thenReturn("encoded");
-        when(employeeRepository.save(any(Employee.class))).thenReturn(saved);
+                Employee saved = new Employee();
+                saved.setId(10L);
+                saved.setFullName("Test User");
+                saved.setEmail("test@test.com");
 
-        EmployeeResponse response = employeeService.createEmployee(request);
+                EmployeeAdminResponse employeeResponse = new EmployeeAdminResponse();
 
-        assertNotNull(response);
-        verify(notificationPublisher).sendNewEmployeeNotification(any(NotificationDTO.class));
-    }
+                when(employeeRepository.existsByEmail("test@test.com")).thenReturn(false);
+                when(departmentRepository.findById(1L)).thenReturn(Optional.of(department));
+                when(employeeMapper.toEntity(request)).thenReturn(mappedEmployee);
+                when(passwordEncoder.encode("password")).thenReturn("encoded");
+                when(employeeRepository.save(any(Employee.class))).thenReturn(saved);
+                when(employeeMapper.toAdminResponse(saved)).thenReturn(employeeResponse);
 
-    @Test
-    void createEmployee_emailAlreadyExists() {
-        EmployeeCreateRequest request = new EmployeeCreateRequest();
-        request.setEmail("test@test.com");
+                EmployeeResponse response = employeeService.createEmployee(request);
 
-        when(employeeRepository.existsByEmail("test@test.com")).thenReturn(true);
+                assertNotNull(response);
+                verify(notificationPublisher).sendNewEmployeeNotification(any(NotificationDTO.class));
+        }
 
-        assertThrows(IllegalArgumentException.class,
-                () -> employeeService.createEmployee(request));
-    }
+        @Test
+        void createEmployee_emailAlreadyExists() {
+                EmployeeCreateRequest request = new EmployeeCreateRequest();
+                request.setEmail("test@test.com");
 
-    @Test
-    void createEmployee_invalidDepartment() {
-        EmployeeCreateRequest request = new EmployeeCreateRequest();
-        request.setEmail("test@test.com");
-        request.setDepartmentId(99L);
+                when(employeeRepository.existsByEmail("test@test.com")).thenReturn(true);
 
-        when(employeeRepository.existsByEmail("test@test.com")).thenReturn(false);
-        when(departmentRepository.findById(99L)).thenReturn(Optional.empty());
+                assertThrows(IllegalArgumentException.class,
+                                () -> employeeService.createEmployee(request));
+        }
 
-        assertThrows(IllegalArgumentException.class,
-                () -> employeeService.createEmployee(request));
-    }
+        @Test
+        void createEmployee_invalidDepartment() {
+                EmployeeCreateRequest request = new EmployeeCreateRequest();
+                request.setEmail("test@test.com");
+                request.setDepartmentId(99L);
 
-    @Test
-    void updateEmployee_success_partialUpdate() {
-        Employee existing = new Employee();
-        existing.setId(1L);
+                when(employeeRepository.existsByEmail("test@test.com")).thenReturn(false);
+                when(departmentRepository.findById(99L)).thenReturn(Optional.empty());
 
-        Department department = new Department();
-        department.setId(2L);
+                assertThrows(IllegalArgumentException.class,
+                                () -> employeeService.createEmployee(request));
+        }
 
-        EmployeeUpdateRequest request = new EmployeeUpdateRequest();
-        request.setFullName("Updated Name");
-        request.setDepartmentId(2L);
+        @Test
+        void updateEmployee_success_partialUpdate() {
+                Employee existing = new Employee();
+                existing.setId(1L);
 
-        when(employeeRepository.findById(1L)).thenReturn(Optional.of(existing));
-        when(departmentRepository.findById(2L)).thenReturn(Optional.of(department));
-        when(employeeRepository.save(any(Employee.class))).thenReturn(existing);
+                Department department = new Department();
+                department.setId(2L);
 
-        EmployeeResponse response =
-                employeeService.updateEmployee(1L, request);
+                EmployeeUpdateRequest request = new EmployeeUpdateRequest();
+                request.setFullName("Updated Name");
+                request.setDepartmentId(2L);
 
-        assertNotNull(response);
-    }
+                EmployeeAdminResponse employeeResponse = new EmployeeAdminResponse();
 
-    @Test
-    void updateEmployee_notFound() {
-        when(employeeRepository.findById(1L)).thenReturn(Optional.empty());
+                when(employeeRepository.findById(1L)).thenReturn(Optional.of(existing));
+                when(departmentRepository.findById(2L)).thenReturn(Optional.of(department));
+                when(employeeRepository.save(any(Employee.class))).thenReturn(existing);
+                doNothing().when(employeeMapper).updateEntityFromRequest(request, existing);
+                when(employeeMapper.toAdminResponse(existing)).thenReturn(employeeResponse);
 
-        assertThrows(IllegalArgumentException.class,
-                () -> employeeService.updateEmployee(1L, new EmployeeUpdateRequest()));
-    }
+                EmployeeResponse response = employeeService.updateEmployee(1L, request);
 
-    @Test
-    void deleteEmployee_success() {
-        Employee employee = new Employee();
-        employee.setRole(Role.ROLE_USER);
+                assertNotNull(response);
+        }
 
-        when(employeeRepository.findById(1L)).thenReturn(Optional.of(employee));
+        @Test
+        void updateEmployee_notFound() {
+                when(employeeRepository.findById(1L)).thenReturn(Optional.empty());
 
-        assertDoesNotThrow(() -> employeeService.deleteEmployee(1L));
-        verify(employeeRepository).delete(employee);
-    }
+                assertThrows(IllegalArgumentException.class,
+                                () -> employeeService.updateEmployee(1L, new EmployeeUpdateRequest()));
+        }
 
-    @Test
-    void deleteEmployee_adminNotAllowed() {
-        Employee employee = new Employee();
-        employee.setRole(Role.ROLE_ADMIN);
+        @Test
+        void deleteEmployee_success() {
+                Employee employee = new Employee();
+                employee.setRole(Role.ROLE_USER);
 
-        when(employeeRepository.findById(1L)).thenReturn(Optional.of(employee));
+                when(employeeRepository.findById(1L)).thenReturn(Optional.of(employee));
 
-        assertThrows(IllegalArgumentException.class,
-                () -> employeeService.deleteEmployee(1L));
-    }
+                assertDoesNotThrow(() -> employeeService.deleteEmployee(1L));
+                verify(employeeRepository).delete(employee);
+        }
 
-    @Test
-    void deleteEmployee_notFound() {
-        when(employeeRepository.findById(99L)).thenReturn(Optional.empty());
+        @Test
+        void deleteEmployee_adminNotAllowed() {
+                Employee employee = new Employee();
+                employee.setRole(Role.ROLE_ADMIN);
 
-        assertThrows(ResourceNotFoundException.class,
-                () -> employeeService.deleteEmployee(99L));
-    }
+                when(employeeRepository.findById(1L)).thenReturn(Optional.of(employee));
+
+                assertThrows(IllegalArgumentException.class,
+                                () -> employeeService.deleteEmployee(1L));
+        }
+
+        @Test
+        void deleteEmployee_notFound() {
+                when(employeeRepository.findById(99L)).thenReturn(Optional.empty());
+
+                assertThrows(ResourceNotFoundException.class,
+                                () -> employeeService.deleteEmployee(99L));
+        }
 }

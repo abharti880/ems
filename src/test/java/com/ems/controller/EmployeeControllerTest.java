@@ -2,9 +2,7 @@ package com.ems.controller;
 
 import com.ems.Enums.Role;
 import com.ems.controller.EmployeeController;
-import com.ems.dto.EmployeeCreateRequest;
-import com.ems.dto.EmployeeResponse;
-import com.ems.dto.EmployeeUpdateRequest;
+import com.ems.dto.*;
 import com.ems.exception.ResourceNotFoundException;
 import com.ems.service.EmployeeService;
 
@@ -63,8 +61,8 @@ class EmployeeControllerTest {
     @Test
     @WithMockUser(roles = "ADMIN")
     void getAllEmployees_success() throws Exception {
-        Page<EmployeeResponse> page =
-                new PageImpl<>(List.of(new EmployeeResponse()));
+        Page<EmployeeAdminResponse> page =
+                new PageImpl<>(List.of(new EmployeeAdminResponse()));
 
         when(employeeService.getAllEmployees(0, 10, "fullName", "asc", null))
                 .thenReturn(page);
@@ -95,7 +93,7 @@ class EmployeeControllerTest {
     @WithMockUser(roles = "ADMIN")
     void getEmployeeById_success() throws Exception {
         when(employeeService.getEmployeeById(1L))
-                .thenReturn(new EmployeeResponse());
+                .thenReturn(new EmployeeAdminResponse());
 
         mockMvc.perform(get("/api/employees/1"))
                 .andExpect(status().isOk());
@@ -133,7 +131,7 @@ class EmployeeControllerTest {
         request.setRole(Role.ROLE_USER);
         request.setSalary(BigDecimal.valueOf(50000));
 
-        EmployeeResponse response = new EmployeeResponse();
+        EmployeeAdminResponse response = new EmployeeAdminResponse();
         response.setId(1L);
         response.setFullName("Test User");
         response.setEmail("test@test.com");
@@ -166,7 +164,7 @@ class EmployeeControllerTest {
     @WithMockUser(roles = "ADMIN")
     void updateEmployee_success() throws Exception {
         when(employeeService.updateEmployee(eq(1L), any()))
-                .thenReturn(new EmployeeResponse());
+                .thenReturn(new EmployeeAdminResponse());
 
         mockMvc.perform(put("/api/employees/1")
                         .with(csrf())
@@ -214,7 +212,7 @@ class EmployeeControllerTest {
     @WithMockUser(username = "test@test.com", roles = "ADMIN")
     void getMyProfile_success() throws Exception {
         when(employeeService.getEmployeeProfile("test@test.com"))
-                .thenReturn(new EmployeeResponse());
+                .thenReturn(new EmployeeSelfResponse());
 
         mockMvc.perform(get("/api/employees/me"))
                 .andExpect(status().isOk());
@@ -264,7 +262,7 @@ class EmployeeControllerTest {
     void getMyProfile_selfAccess_nonAdmin() throws Exception {
 
         when(employeeService.getEmployeeProfile("user@test.com"))
-                .thenReturn(new EmployeeResponse());
+                .thenReturn(new EmployeeSelfResponse());
 
         mockMvc.perform(get("/api/employees/me"))
                 .andExpect(status().isOk());

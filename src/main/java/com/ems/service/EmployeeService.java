@@ -1,10 +1,7 @@
 package com.ems.service;
 
 import com.ems.Enums.Role;
-import com.ems.dto.EmployeeCreateRequest;
-import com.ems.dto.EmployeeResponse;
-import com.ems.dto.EmployeeUpdateRequest;
-import com.ems.dto.NotificationDTO;
+import com.ems.dto.*;
 import com.ems.entity.Department;
 import com.ems.entity.Employee;
 import com.ems.exception.ResourceNotFoundException;
@@ -36,33 +33,37 @@ public class EmployeeService {
     private final NotificationPublisher notificationPublisher;
     private final PasswordEncoder passwordEncoder;
     private final DepartmentRepository departmentRepository;
+    private final EmployeeMapper employeeMapper;
 
     @Transactional(readOnly = true)
-    public Page<EmployeeResponse> getAllEmployees(int page, int size, String sortBy, String direction, Long departmentId) {
-        log.info("Fetching employees page={}, size={}, sortBy={}, direction={}, deptId={}", page, size, sortBy, direction, departmentId);
+    public Page<EmployeeAdminResponse> getAllEmployees(int page, int size, String sortBy, String direction,
+                                                       Long departmentId) {
+        log.info("Fetching employees page={}, size={}, sortBy={}, direction={}, deptId={}", page, size, sortBy,
+                direction, departmentId);
 
         Sort.Direction sortDirection = direction.equalsIgnoreCase("asc") ? Sort.Direction.ASC : Sort.Direction.DESC;
 
         Pageable pageable = PageRequest.of(page, size, Sort.by(sortDirection, sortBy));
 
-        Page<Employee> employeePage = departmentId != null ? employeeRepository.findByDepartmentId(departmentId, pageable) : employeeRepository.findAll(pageable);
-        return employeePage.map(EmployeeMapper::toResponse);
+        Page<Employee> employeePage = departmentId != null
+                ? employeeRepository.findByDepartmentId(departmentId, pageable)
+                : employeeRepository.findAll(pageable);
+        return employeePage.map(employeeMapper::toAdminResponse);
     }
 
-
     @Transactional
-    public EmployeeResponse getEmployeeProfile(String email) {
+    public EmployeeSelfResponse getEmployeeProfile(String email) {
         log.info("Fetching employee by email={}", email);
         Employee employee = employeeRepository.findByEmail(email)
                 .orElseThrow(() -> {
                     log.error("Employee not found with email={}", email);
                     return new ResourceNotFoundException("Employee not found");
                 });
-        return EmployeeMapper.toResponse(employee);
+        return employeeMapper.toSelfResponse(employee);
     }
 
     @Transactional
-    public EmployeeResponse getEmployeeById(Long id) {
+    public EmployeeAdminResponse getEmployeeById(Long id) {
         log.info("Fetching employee by id={}", id);
         Employee employee = employeeRepository.findById(id)
                 .orElseThrow(() -> {
@@ -70,10 +71,10 @@ public class EmployeeService {
                     return new ResourceNotFoundException("Employee not found");
                 });
 
-        return EmployeeMapper.toResponse(employee);
+        return employeeMapper.toAdminResponse(employee);
     }
 
-    public EmployeeResponse createEmployee(EmployeeCreateRequest request) {
+    public EmployeeAdminResponse createEmployee(EmployeeCreateRequest request) {
 
         if (employeeRepository.existsByEmail(request.getEmail())) {
             throw new IllegalArgumentException("Email already exists");
@@ -82,13 +83,8 @@ public class EmployeeService {
         Department department = departmentRepository.findById(request.getDepartmentId())
                 .orElseThrow(() -> new IllegalArgumentException("Invalid department id"));
 
-        Employee employee = new Employee();
-        employee.setFullName(request.getFullName());
-        employee.setEmail(request.getEmail());
+        Employee employee = employeeMapper.toEntity(request);
         employee.setPassword(passwordEncoder.encode(request.getPassword()));
-        employee.setRole(request.getRole());
-        employee.setSalary(request.getSalary());
-        employee.setJoiningDate(request.getJoiningDate());
         employee.setDepartment(department);
 
         Employee saved = employeeRepository.save(employee);
@@ -100,38 +96,33 @@ public class EmployeeService {
                         .recipientName(saved.getFullName())
                         .recipientEmail(saved.getEmail())
                         .content(buildNewEmployeeContent(employee))
-                        .build()
-        );
+                        .build());
 
-        return EmployeeMapper.toResponse(saved);
+        return employeeMapper.toAdminResponse(saved);
     }
 
     @Transactional
-    public EmployeeResponse updateEmployee(Long id, EmployeeUpdateRequest request) {
+    public EmployeeAdminResponse updateEmployee(Long id, EmployeeUpdateRequest request) {
 
         log.info("Updating employee id={}", id);
 
         Employee existing = employeeRepository.findById(id).orElseThrow(() -> new IllegalArgumentException("Employee not found"));
 
-        if (request.getFullName() != null) {
-            existing.setFullName(request.getFullName());
-        }
-
-        if (request.getSalary() != null) {
-            existing.setSalary(request.getSalary());
-        }
+        employeeMapper.updateEntityFromRequest(request, existing);
 
         if (request.getDepartmentId() != null) {
-            Department department = departmentRepository.findById(request.getDepartmentId()).orElseThrow(() -> new IllegalArgumentException("Invalid department id"));
+            Department department = departmentRepository.findById(request.getDepartmentId())
+                    .orElseThrow(() -> new IllegalArgumentException("Invalid department id"));
             existing.setDepartment(department);
         }
         Employee saved = employeeRepository.save(existing);
-        return EmployeeMapper.toResponse(saved);
+        return employeeMapper.toAdminResponse(saved);
     }
 
     @Transactional
     public void deleteEmployee(Long id) {
-        Employee employee = employeeRepository.findById(id).orElseThrow(() -> new ResourceNotFoundException("Employee not found"));
+        Employee employee = employeeRepository.findById(id)
+                .orElseThrow(() -> new ResourceNotFoundException("Employee not found"));
 
         if (employee.getRole() == Role.ROLE_ADMIN) {
             throw new IllegalArgumentException("Admin users cannot be deleted");
@@ -150,8 +141,7 @@ public class EmployeeService {
                         "Purpose: New employee onboarding notification.",
                 employee.getId(),
                 employee.getFullName(),
-                employee.getEmail()
-        );
+                employee.getEmail());
     }
 
 }

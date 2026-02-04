@@ -1,15 +1,18 @@
 package com.ems.dto;
 
 import com.ems.Enums.Role;
-import lombok.Getter;
-import lombok.Setter;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.Data;
+import lombok.NoArgsConstructor;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 
-@Getter
-@Setter
+@Data
+@NoArgsConstructor
+@AllArgsConstructor
 public class EmployeeResponse {
     private Long id;
     private String fullName;
@@ -17,8 +20,5 @@ public class EmployeeResponse {
     private DepartmentSummary department;
     private BigDecimal salary;
     private LocalDate joiningDate;
-    private LocalDateTime createdAt;
-    private LocalDateTime updatedAt;
     private Role role;
 }
-
